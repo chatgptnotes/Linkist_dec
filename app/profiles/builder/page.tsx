@@ -381,7 +381,7 @@ function ProfileBuilderContent() {
     showEmailPublicly: true,
     showSecondaryEmailPublicly: true,
     showMobilePublicly: true,
-    showWhatsappPublicly: false,
+    showWhatsappPublicly: true,
 
     jobTitle: '',
     companyName: '',
@@ -929,10 +929,10 @@ function ProfileBuilderContent() {
 
               // Auto-detect country codes from phone numbers and split them
               console.log('📱 Raw phone_number from database:', profileToEdit.phone_number);
-              console.log('📱 Raw whatsapp from database:', profileToEdit.whatsapp);
+              console.log('📱 Raw whatsapp_number from database:', profileToEdit.whatsapp_number);
 
               const mobileDetected = detectCountryCodeFromNumber(profileToEdit.phone_number || '');
-              const whatsappDetected = detectCountryCodeFromNumber(profileToEdit.whatsapp || '');
+              const whatsappDetected = detectCountryCodeFromNumber(profileToEdit.whatsapp_number || '');
 
               console.log('📞 Mobile detected - Code:', mobileDetected.countryCode, 'Number:', mobileDetected.number);
               console.log('📞 WhatsApp detected - Code:', whatsappDetected.countryCode, 'Number:', whatsappDetected.number);
@@ -953,7 +953,7 @@ function ProfileBuilderContent() {
                 showEmailPublicly: profileToEdit.show_email_publicly ?? true,
                 showSecondaryEmailPublicly: profileToEdit.show_secondary_email_publicly ?? true,
                 showMobilePublicly: profileToEdit.show_mobile_publicly ?? true,
-                showWhatsappPublicly: profileToEdit.show_whatsapp_publicly ?? false,
+                showWhatsappPublicly: profileToEdit.show_whatsapp_publicly ?? true,
 
                 jobTitle: profileToEdit.job_title || profileToEdit.title || '',
                 companyName: profileToEdit.company || profileToEdit.company_name || '',
@@ -1228,7 +1228,7 @@ function ProfileBuilderContent() {
             showEmailPublicly: displaySettings.showEmailPublicly ?? prefs.showEmailPublicly ?? true,
             showSecondaryEmailPublicly: displaySettings.showSecondaryEmailPublicly ?? prefs.showSecondaryEmailPublicly ?? true,
             showMobilePublicly: displaySettings.showMobilePublicly ?? prefs.showMobilePublicly ?? true,
-            showWhatsappPublicly: displaySettings.showWhatsappPublicly ?? prefs.showWhatsappPublicly ?? false,
+            showWhatsappPublicly: displaySettings.showWhatsappPublicly ?? prefs.showWhatsappPublicly ?? true,
 
             jobTitle: prefs.jobTitle || '',
             companyName: profile.company || '',
@@ -2184,8 +2184,13 @@ function ProfileBuilderContent() {
                               type="tel"
                               value={profileData.whatsappNumber}
                               onChange={(e) => {
-                                // FIXED: Just store the number, respect dropdown selection
-                                setProfileData({ ...profileData, whatsappNumber: e.target.value });
+                                const newValue = e.target.value;
+                                // Auto-enable toggle when user starts typing
+                                if (newValue && !profileData.showWhatsappPublicly) {
+                                  setProfileData({ ...profileData, whatsappNumber: newValue, showWhatsappPublicly: true });
+                                } else {
+                                  setProfileData({ ...profileData, whatsappNumber: newValue });
+                                }
                               }}
                               disabled={useSameNumberForWhatsapp}
                               className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none ${useSameNumberForWhatsapp ? 'bg-gray-100 cursor-not-allowed' : ''}`}

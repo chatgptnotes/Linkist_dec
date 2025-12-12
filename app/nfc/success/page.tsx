@@ -19,7 +19,21 @@ const ArrowRight = ArrowForwardIcon;
 
 export default function SuccessPage() {
   const router = useRouter();
-  const [orderData, setOrderData] = useState<{ orderNumber: string; cardConfig: { fullName: string }; shipping: { fullName: string; email: string; phone: string; addressLine1: string; addressLine2?: string; city: string; stateProvince?: string; postalCode: string; country: string; isFounderMember: boolean; quantity: number }; pricing: { total: number } } | null>(null);
+  const [orderData, setOrderData] = useState<{
+    orderNumber: string;
+    cardConfig: { fullName: string; quantity?: number };
+    shipping: { fullName: string; email: string; phone: string; addressLine1: string; addressLine2?: string; city: string; stateProvince?: string; postalCode: string; country: string; isFounderMember: boolean; quantity: number };
+    pricing: { total: number; materialPrice?: number; appSubscriptionPrice?: number; taxAmount?: number; subtotal?: number };
+    voucherCode?: string;
+    voucherDiscount?: number;
+    voucherAmount?: number;
+    isDigitalOnly?: boolean;
+    isDigitalProduct?: boolean;
+    customerName?: string;
+    email?: string;
+    phoneNumber?: string;
+    amount?: number;
+  } | null>(null);
 
   useEffect(() => {
     // Disable back button to prevent returning to payment page
@@ -137,82 +151,65 @@ export default function SuccessPage() {
               </div>
 
               <div className="pt-3 space-y-2">
+                {/* Display stored pricing values exactly as shown on payment page - NO recalculation */}
                 {(() => {
-                  // Use actual pricing data from order instead of backwards calculation
-                  const finalTotal = orderData.pricing?.total || orderData.amount || 0;
-                  const voucherPercent = orderData.voucherDiscount || 0;
-
-                  // Get actual pricing breakdown from order data
-                  const materialPrice = orderData.pricing?.materialPrice || 0;
-                  const appSubscriptionPrice = orderData.pricing?.appSubscriptionPrice || 0;
-                  const quantity = orderData.cardConfig?.quantity || orderData.quantity || 1;
-
-                  // Calculate subtotal (material + app subscription)
-                  const subtotalBeforeDiscount = (materialPrice * quantity) + (appSubscriptionPrice * quantity);
-
-                  // Get actual tax amount from order data (or calculate if not available)
-                  let taxAmount = orderData.pricing?.taxAmount || orderData.pricing?.tax || 0;
-                  let taxLabel = 'VAT (5%)';
-                  let taxRate = 0.05;
-
-                  // Determine correct tax rate based on country
+                  const quantity = orderData.cardConfig?.quantity || 1;
+                  const materialPrice = orderData.pricing?.materialPrice || 99;
+                  const appSubscriptionPrice = orderData.pricing?.appSubscriptionPrice || 120;
+                  const taxAmount = orderData.pricing?.taxAmount || 0;
+                  const subtotal = orderData.pricing?.subtotal || ((materialPrice + appSubscriptionPrice) * quantity + taxAmount);
                   const country = orderData.shipping?.country || '';
-                  if (country === 'IN' || country === 'India') {
-                    taxRate = 0.18;
-                    taxLabel = 'GST (18%)';
-                    // Recalculate tax if not provided correctly
-                    if (!taxAmount || taxAmount < subtotalBeforeDiscount * 0.15) {
-                      taxAmount = subtotalBeforeDiscount * taxRate;
-                    }
-                  } else if (country === 'AE' || country === 'United Arab Emirates' || country === 'UAE') {
-                    taxRate = 0.05;
-                    taxLabel = 'VAT (5%)';
-                    if (!taxAmount) {
-                      taxAmount = subtotalBeforeDiscount * taxRate;
-                    }
-                  } else {
-                    // Default tax rate for other countries
-                    if (!taxAmount) {
-                      taxAmount = subtotalBeforeDiscount * taxRate;
-                    }
-                  }
-
-                  // Calculate total before discount
-                  const totalBeforeDiscount = subtotalBeforeDiscount + taxAmount;
-
-                  // Calculate voucher discount amount
-                  const voucherDiscountAmount = voucherPercent > 0
-                    ? (totalBeforeDiscount * voucherPercent / 100)
-                    : 0;
+                  const isIndia = country === 'IN' || country === 'India';
+                  const taxLabel = isIndia ? 'GST (18%)' : 'VAT (5%)';
 
                   return (
                     <>
+                      {/* Base Material */}
                       <div className="flex justify-between text-gray-600">
-                        <span>Subtotal</span>
-                        <span>${subtotalBeforeDiscount.toFixed(2)}</span>
+                        <span>Base Material × {quantity}</span>
+                        <span>${(materialPrice * quantity).toFixed(2)}</span>
                       </div>
+
+                      {/* 1 Year App Subscription - Must match payment page */}
+                      <div className="flex justify-between text-gray-600">
+                        <span>1 Year Linkist App Subscription × {quantity}</span>
+                        <span>${(appSubscriptionPrice * quantity).toFixed(2)}</span>
+                      </div>
+
                       <div className="flex justify-between text-gray-600">
                         <span>Customization</span>
                         <span className="text-green-600">Included</span>
                       </div>
+
                       <div className="flex justify-between text-gray-600">
-                        <span>Shipping ({orderData.shipping?.country === 'United Arab Emirates' ? 'UAE' : orderData.shipping?.country || 'AE'})</span>
+                        <span>Shipping ({country === 'United Arab Emirates' ? 'UAE' : country || 'AE'})</span>
                         <span className="text-green-600">Free</span>
                       </div>
+
+                      {/* Tax - Use stored value, NO recalculation */}
                       <div className="flex justify-between text-gray-600">
                         <span>{taxLabel}</span>
                         <span>${taxAmount.toFixed(2)}</span>
                       </div>
+
+                      {/* Subtotal - Use stored value */}
+                      <div className="flex justify-between text-gray-600 border-t border-gray-200 pt-2 mt-2">
+                        <span>Subtotal</span>
+                        <span>${subtotal.toFixed(2)}</span>
+                      </div>
+
                       {orderData.shipping?.isFounderMember && (
                         <div className="flex justify-between text-green-600">
                           <span>Founder Member Benefits (10% off)</span>
                           <span>Included</span>
                         </div>
                       )}
-                      {orderData.voucherCode && orderData.voucherDiscount && (
+
+                      {/* Voucher Discount - Use stored voucherAmount, NO recalculation */}
+                      {orderData.voucherCode && orderData.voucherAmount > 0 && (
                         <div className="flex justify-between text-green-600 font-medium">
                           <span>Voucher Discount ({orderData.voucherCode} - {orderData.voucherDiscount}%)</span>
-                          <span>-${voucherDiscountAmount.toFixed(2)}</span>
+                          <span>-${(orderData.voucherAmount || 0).toFixed(2)}</span>
                         </div>
                       )}
                     </>
@@ -220,10 +217,11 @@ export default function SuccessPage() {
                 })()}
               </div>
 
+              {/* Total - Use stored value */}
               <div className="flex justify-between items-center pt-3 border-t border-gray-200">
                 <span className="text-gray-700 font-bold">Total Amount</span>
                 <span className="font-bold text-xl text-gray-900">
-                  ${(orderData.pricing?.total || (orderData as any).amount || 0).toFixed(2)}
+                  ${(orderData.pricing?.total || 0).toFixed(2)}
                 </span>
               </div>
             </div>

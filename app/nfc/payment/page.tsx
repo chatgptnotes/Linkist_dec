@@ -586,7 +586,7 @@ export default function NFCPaymentPage() {
       if (paymentResult && paymentResult.success) {
         console.log('✅ Payment successful, processing order...');
 
-        // Store payment confirmation
+        // Store payment confirmation with complete pricing data
         const orderConfirmation = {
           ...orderData,
           paymentMethod,
@@ -594,10 +594,16 @@ export default function NFCPaymentPage() {
           amount: getFinalAmount(),
           pricing: {
             ...orderData.pricing,
+            // Explicitly store all pricing fields for success page
+            materialPrice: orderData.pricing?.materialPrice || 99,
+            appSubscriptionPrice: orderData.pricing?.appSubscriptionPrice || 120,
+            taxAmount: orderData.pricing?.taxAmount || 0,
+            subtotal: getSubtotal(),
             total: getFinalAmount()
           },
           voucherCode: voucherCode || null,
           voucherDiscount: voucherDiscount || 0,
+          voucherAmount: voucherAmount || 0,
           timestamp: new Date().toISOString()
         };
 
@@ -676,7 +682,7 @@ export default function NFCPaymentPage() {
     setProcessing(true);
 
     try {
-      // Store payment confirmation
+      // Store payment confirmation with complete pricing data
       const orderConfirmation = {
         ...orderData,
         paymentMethod: 'card',
@@ -684,10 +690,16 @@ export default function NFCPaymentPage() {
         amount: getFinalAmount(),
         pricing: {
           ...orderData.pricing,
+          // Explicitly store all pricing fields for success page
+          materialPrice: orderData.pricing?.materialPrice || 99,
+          appSubscriptionPrice: orderData.pricing?.appSubscriptionPrice || 120,
+          taxAmount: orderData.pricing?.taxAmount || 0,
+          subtotal: getSubtotal(),
           total: getFinalAmount()
         },
         voucherCode: appliedVoucherCode || voucherCode || null,
         voucherDiscount: voucherDiscount || 0,
+        voucherAmount: voucherAmount || 0,
         timestamp: new Date().toISOString()
       };
 
