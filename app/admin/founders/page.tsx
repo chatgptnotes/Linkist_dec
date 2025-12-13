@@ -38,7 +38,9 @@ const Crown = StarsIcon;
 
 interface FoundersRequest {
   id: string;
-  full_name: string;
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null;  // Legacy field
   email: string;
   phone: string;
   profession: string;
@@ -48,6 +50,14 @@ interface FoundersRequest {
   created_at: string;
   updated_at: string;
 }
+
+// Helper function to get display name from first_name/last_name or fall back to full_name
+const getDisplayName = (req: FoundersRequest): string => {
+  if (req.first_name || req.last_name) {
+    return `${req.first_name || ''} ${req.last_name || ''}`.trim();
+  }
+  return req.full_name || 'N/A';
+};
 
 interface InviteCode {
   id: string;
@@ -206,10 +216,11 @@ export default function AdminFoundersPage() {
   };
 
   const filteredRequests = requests.filter(req => {
+    const displayName = getDisplayName(req).toLowerCase();
     const matchesSearch =
-      req.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.phone.includes(searchTerm);
+      displayName.includes(searchTerm.toLowerCase()) ||
+      (req.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (req.phone || '').includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || req.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -352,7 +363,7 @@ export default function AdminFoundersPage() {
                   filteredRequests.map((request) => (
                     <tr key={request.id} className="hover:bg-gray-50">
                       <td className="px-4 py-4">
-                        <div className="font-medium text-gray-900">{request.full_name}</div>
+                        <div className="font-medium text-gray-900">{getDisplayName(request)}</div>
                         {request.note && (
                           <div className="text-xs text-gray-500 mt-1 max-w-xs truncate" title={request.note}>
                             "{request.note}"
@@ -527,7 +538,7 @@ export default function AdminFoundersPage() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Person className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm font-medium">{selectedRequest.full_name}</span>
+                        <span className="text-sm font-medium">{getDisplayName(selectedRequest)}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4 text-gray-400" />
@@ -592,7 +603,7 @@ export default function AdminFoundersPage() {
 
               <h2 className="text-xl font-bold text-gray-900 mb-2">Reject Request</h2>
               <p className="text-gray-600 mb-4">
-                Rejecting request from <strong>{selectedRequest.full_name}</strong>
+                Rejecting request from <strong>{getDisplayName(selectedRequest)}</strong>
               </p>
 
               <div className="mb-4">

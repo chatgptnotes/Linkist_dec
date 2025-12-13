@@ -22,7 +22,7 @@ export default function ChoosePlanPage() {
   });
 
   const handlePersonalUse = () => {
-    router.push('/welcome-to-linkist');
+    router.push('/product-selection');
   };
 
   const handleTeamUse = () => {

@@ -219,8 +219,36 @@ function VerifyMobileContent() {
       const otpSentKey = `otp_sent_${phone}`;
       sessionStorage.removeItem(otpSentKey);
 
+      // Check if this was triggered from product selection flow
+      const pendingProductFlow = localStorage.getItem('pendingProductFlow');
+      const productSelection = localStorage.getItem('productSelection');
+
       setTimeout(() => {
-        router.push('/product-selection');
+        if (pendingProductFlow === 'true' && productSelection) {
+          // Clear the pending flow flag
+          localStorage.removeItem('pendingProductFlow');
+
+          // Redirect based on selected product
+          if (productSelection === 'digital-only') {
+            // Free tier - go back to product selection to process order
+            router.push('/product-selection');
+          } else if (productSelection === 'digital-with-app') {
+            // Digital + App - go to payment
+            router.push('/nfc/payment');
+          } else if (productSelection === 'physical-digital') {
+            // Physical card - go to configure
+            router.push('/nfc/configure');
+          } else if (productSelection === 'founders-club') {
+            // Founders club - go to configure with founders flag
+            router.push('/nfc/configure?founders=true');
+          } else {
+            // Default fallback
+            router.push('/product-selection');
+          }
+        } else {
+          // Normal flow - redirect to product selection
+          router.push('/product-selection');
+        }
       }, 2000);
 
     } catch (err) {

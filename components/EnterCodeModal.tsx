@@ -32,7 +32,8 @@ export default function EnterCodeModal({ isOpen, onClose, onSuccess }: EnterCode
     }
 
     try {
-      const response = await fetch('/api/founders/validate', {
+      // Use the activate endpoint which validates code AND creates account/session
+      const response = await fetch('/api/founders/activate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,10 +48,24 @@ export default function EnterCodeModal({ isOpen, onClose, onSuccess }: EnterCode
 
       if (response.ok && data.success) {
         setSuccess(true);
-        // Store validated code in localStorage for checkout
+        // Store validated code and user data in localStorage
         localStorage.setItem('foundersClubCode', formattedCode);
         localStorage.setItem('foundersClubEmail', email.trim().toLowerCase());
         localStorage.setItem('foundersClubValidated', 'true');
+        localStorage.setItem('isFoundingMember', 'true');
+        localStorage.setItem('foundingMemberPlan', 'lifetime');
+
+        // Store user profile if returned
+        if (data.user) {
+          localStorage.setItem('userProfile', JSON.stringify({
+            id: data.user.id,
+            email: data.user.email,
+            firstName: data.user.first_name,
+            lastName: data.user.last_name,
+            phone: data.user.phone_number,
+            isFoundingMember: true
+          }));
+        }
 
         setTimeout(() => {
           onSuccess({ code: formattedCode, email: email.trim().toLowerCase() });
@@ -59,7 +74,7 @@ export default function EnterCodeModal({ isOpen, onClose, onSuccess }: EnterCode
         setError(data.error || 'Invalid or expired code. Please check and try again.');
       }
     } catch (err) {
-      console.error('Error validating code:', err);
+      console.error('Error activating founders account:', err);
       setError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);

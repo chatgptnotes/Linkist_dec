@@ -10,10 +10,10 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { fullName, email, phone, profession, note } = body;
+    const { firstName, lastName, email, phone, profession, note } = body;
 
     // Validate required fields
-    if (!fullName || !email || !phone || !profession) {
+    if (!firstName || !lastName || !email || !phone || !profession) {
       return NextResponse.json(
         { success: false, error: 'All required fields must be provided' },
         { status: 400 }
@@ -63,7 +63,8 @@ export async function POST(request: NextRequest) {
     const { data: newRequest, error: insertError } = await supabase
       .from('founders_requests')
       .insert({
-        full_name: fullName.trim(),
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
         email: email.toLowerCase().trim(),
         phone: phone.trim(),
         profession: profession.trim(),

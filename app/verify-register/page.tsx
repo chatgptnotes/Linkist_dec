@@ -62,8 +62,36 @@ export default function VerifyRegisterPage() {
         localStorage.removeItem('registrationData');
         // Mark email as verified
         localStorage.setItem('emailVerified', 'true');
-        // Redirect to product selection for new users (same as mobile verification)
-        router.push('/product-selection');
+
+        // Check if this was triggered from product selection flow
+        const pendingProductFlow = localStorage.getItem('pendingProductFlow');
+        const productSelection = localStorage.getItem('productSelection');
+
+        if (pendingProductFlow === 'true' && productSelection) {
+          // Clear the pending flow flag
+          localStorage.removeItem('pendingProductFlow');
+
+          // Redirect based on selected product
+          if (productSelection === 'digital-only') {
+            // Free tier - go to success page (order will be created)
+            router.push('/product-selection'); // Will auto-process and redirect to success
+          } else if (productSelection === 'digital-with-app') {
+            // Digital + App - go to payment
+            router.push('/nfc/payment');
+          } else if (productSelection === 'physical-digital') {
+            // Physical card - go to configure
+            router.push('/nfc/configure');
+          } else if (productSelection === 'founders-club') {
+            // Founders club - go to configure with founders flag
+            router.push('/nfc/configure?founders=true');
+          } else {
+            // Default fallback
+            router.push('/product-selection');
+          }
+        } else {
+          // Normal registration flow - redirect to product selection
+          router.push('/product-selection');
+        }
       } else {
         showToast(data.error || 'Invalid verification code', 'error');
       }

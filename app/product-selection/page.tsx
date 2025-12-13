@@ -13,6 +13,9 @@ import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import Footer from '@/components/Footer';
 import RequestAccessModal from '@/components/RequestAccessModal';
 import EnterCodeModal from '@/components/EnterCodeModal';
+import SignupOverlay from '@/components/SignupOverlay';
+import Link from 'next/link';
+import LoginIcon from '@mui/icons-material/Login';
 
 const Check = CheckIcon;
 const CreditCard = CreditCardIcon;
@@ -54,7 +57,30 @@ export default function ProductSelectionPage() {
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [foundersClubUnlocked, setFoundersClubUnlocked] = useState(false);
 
+  // Auth state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showSignupOverlay, setShowSignupOverlay] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
   useEffect(() => {
+    // Check if user is logged in
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user) {
+            setIsLoggedIn(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+    checkAuth();
+
     // Get user's country from localStorage (set during onboarding)
     const userProfile = localStorage.getItem('userProfile');
     if (userProfile) {
@@ -212,10 +238,18 @@ export default function ProductSelectionPage() {
       return;
     }
 
-    setLoading(true);
-
     // Store the selection
     localStorage.setItem('productSelection', selectedProduct);
+
+    // If user is not logged in, show signup overlay (for Cards 1-3)
+    // Founders Club has its own flow via Enter Code modal
+    if (!isLoggedIn && selectedProduct !== 'founders-club') {
+      localStorage.setItem('pendingProductFlow', 'true');
+      setShowSignupOverlay(true);
+      return;
+    }
+
+    setLoading(true);
 
     // Route based on product type
     if (selectedProduct === 'digital-only') {
@@ -422,6 +456,21 @@ export default function ProductSelectionPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col">
+      {/* Header with Login Button */}
+      {!isLoggedIn && !checkingAuth && (
+        <div className="w-full px-4 md:px-6 py-4">
+          <div className="max-w-7xl mx-auto flex justify-end">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-red-600 transition-colors"
+            >
+              <LoginIcon className="w-5 h-5" />
+              Login
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 flex-grow">
         {/* Title Section */}
@@ -686,6 +735,13 @@ export default function ProductSelectionPage() {
         isOpen={showCodeModal}
         onClose={() => setShowCodeModal(false)}
         onSuccess={handleFoundersCodeSuccess}
+      />
+
+      {/* Signup Overlay for Cards 1-3 */}
+      <SignupOverlay
+        isOpen={showSignupOverlay}
+        onClose={() => setShowSignupOverlay(false)}
+        selectedProduct={selectedProduct}
       />
     </div>
   );

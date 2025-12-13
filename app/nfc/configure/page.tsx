@@ -742,7 +742,9 @@ export default function ConfigureNewPage() {
                           alt="Linkist"
                           className="h-16 w-auto mb-4"
                         />
-                        <div className={`${getTextColor()} text-sm font-medium tracking-wider`}>FOUNDING MEMBER</div>
+                        {isFoundingMember && (
+                          <div className={`${getTextColor()} text-sm font-medium tracking-wider`}>FOUNDING MEMBER</div>
+                        )}
                         <div className="absolute bottom-1 right-4">
                         {/* <img src="/nfc2.png" alt="NFC" className="w-12 h-12" /> */}
                       </div>

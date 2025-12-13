@@ -24,7 +24,7 @@ const AUTH_CONFIG: {
   // Protected user routes
   protectedRoutes: ['/account', '/dashboard'],
   // Public routes that don't need auth
-  publicRoutes: ['/', '/login', '/register', '/signup', '/verify-login', '/nfc/configure', '/nfc/checkout', '/nfc/success', '/welcome-to-linkist', '/verify-mobile'],
+  publicRoutes: ['/', '/login', '/register', '/signup', '/verify-login', '/verify-register', '/nfc/configure', '/nfc/checkout', '/nfc/success', '/nfc/payment', '/welcome-to-linkist', '/verify-mobile', '/product-selection'],
   // API routes that need admin access
   adminApiRoutes: ['/api/admin'],
   // API routes that need user auth (excluding specific endpoints)
@@ -197,12 +197,42 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<AuthSe
       return { user: null, isAuthenticated: false, isAdmin: false }
     }
 
+    // Fetch user details from database for founding member status
+    let isFoundingMember: boolean = false
+    let foundingMemberSince: string | null = null
+    let foundingMemberPlan: string | null = null
+    let firstName: string | null = null
+    let lastName: string | null = null
+
+    try {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('first_name, last_name, is_founding_member, founding_member_since, founding_member_plan')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (userData) {
+        firstName = userData.first_name || null
+        lastName = userData.last_name || null
+        isFoundingMember = userData.is_founding_member || false
+        foundingMemberSince = userData.founding_member_since || null
+        foundingMemberPlan = userData.founding_member_plan || null
+      }
+    } catch (dbError) {
+      console.warn('Failed to fetch user details for Supabase session:', dbError)
+    }
+
     const authUser: AuthUser = {
       id: user.id,
       email: user.email!,
       role: 'user', // Regular users default to 'user' role
       email_verified: user.email_confirmed_at != null,
       created_at: user.created_at,
+      first_name: firstName,
+      last_name: lastName,
+      is_founding_member: isFoundingMember,
+      founding_member_since: foundingMemberSince,
+      founding_member_plan: foundingMemberPlan,
     }
 
     return {
