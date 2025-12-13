@@ -159,7 +159,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     console.log('Checkout: Loading configuration data...');
 
-    // Check founding member status immediately on page load
+    // Check founding member status and populate contact fields from DB
     const checkFoundingMemberEarly = async () => {
       try {
         const response = await fetch('/api/auth/me', {
@@ -171,6 +171,26 @@ export default function CheckoutPage() {
           const isFoundingMember = data.user?.is_founding_member || false;
           setUserIsFoundingMember(isFoundingMember);
           console.log('✅ Checkout: Founding member status loaded early:', isFoundingMember);
+
+          // Populate ALL contact fields from DB (single source of truth)
+          if (data.user) {
+            if (data.user.email) {
+              setValue('email', data.user.email);
+              console.log('✅ Checkout: Populated email from DB:', data.user.email);
+            }
+            if (data.user.first_name) {
+              setValue('firstName', data.user.first_name);
+              console.log('✅ Checkout: Populated firstName from DB:', data.user.first_name);
+            }
+            if (data.user.last_name) {
+              setValue('lastName', data.user.last_name);
+              console.log('✅ Checkout: Populated lastName from DB:', data.user.last_name);
+            }
+            if (data.user.phone_number) {
+              setValue('phone', data.user.phone_number);
+              console.log('✅ Checkout: Populated phone from DB:', data.user.phone_number);
+            }
+          }
         }
       } catch (error) {
         console.log('⚠️ Checkout: Could not check founding member status early');

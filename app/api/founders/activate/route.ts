@@ -141,14 +141,27 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       console.log('👤 [founders/activate] Updating existing user as founding member');
 
-      // Update existing user as founding member and activate
+      // Fetch phone from founders_requests to update existing user
+      let phoneFromRequest = null;
+      if (inviteCode.request_id) {
+        const { data: originalRequest } = await supabase
+          .from('founders_requests')
+          .select('phone')
+          .eq('id', inviteCode.request_id)
+          .single();
+        phoneFromRequest = originalRequest?.phone;
+      }
+
+      // Update existing user as founding member and activate (include phone if available)
       const { data: updatedUser, error: updateUserError } = await supabase
         .from('users')
         .update({
           is_founding_member: true,
           founding_member_since: new Date().toISOString(),
           founding_member_plan: 'lifetime',
-          status: 'active' // Activate user
+          status: 'active', // Activate user
+          // Update phone_number if we have it from founders_requests and user doesn't have one
+          ...(phoneFromRequest && !existingUser.phone_number && { phone_number: phoneFromRequest })
         })
         .eq('id', existingUser.id)
         .select()
@@ -163,6 +176,7 @@ export async function POST(request: NextRequest) {
       }
 
       user = updatedUser;
+      console.log('✅ [founders/activate] Existing user updated with phone:', updatedUser.phone_number);
     } else {
       console.log('🆕 [founders/activate] Creating new user from founders request');
 

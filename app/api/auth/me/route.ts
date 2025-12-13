@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
+        phone_number: user.phone_number || null,
         email_verified: user.email_verified,
         mobile_verified: user.mobile_verified,
         role: user.role,

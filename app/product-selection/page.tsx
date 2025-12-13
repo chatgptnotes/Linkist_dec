@@ -224,12 +224,21 @@ export default function ProductSelectionPage() {
 
   // Handler for Founders Club code validation success
   const handleFoundersCodeSuccess = (data: { code: string; email: string }) => {
-    setFoundersClubUnlocked(true);
     setShowCodeModal(false);
-    setSelectedProduct('founders-club');
-    // Store the validated invite code for use in checkout
+
+    // Store all necessary data for the founders flow
     localStorage.setItem('foundersInviteCode', data.code);
-    showToast('Welcome to the Founders Club! You can now select exclusive benefits.', 'success');
+    localStorage.setItem('foundersClubValidated', 'true');
+    localStorage.setItem('productSelection', 'founders-club');
+    localStorage.setItem('isFoundingMember', 'true');
+    localStorage.setItem('foundingMemberPlan', 'lifetime');
+
+    showToast('Welcome to the Founders Club! Redirecting...', 'success');
+
+    // Auto-proceed to configure page - no need to select the card again
+    setTimeout(() => {
+      router.push('/nfc/configure?founders=true');
+    }, 500);
   };
 
   const handleConfirmSelection = async () => {
