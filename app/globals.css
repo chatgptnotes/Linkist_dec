@@ -481,6 +481,14 @@ button.bg-red-800 {
   background-color: #991b1b !important;
 }
 
+button.bg-green-600 {
+  background-color: #16a34a !important;
+}
+
+button.bg-green-700 {
+  background-color: #15803d !important;
+}
+
 button.bg-red-700 span,
 button.bg-red-600 span,
 button.bg-red-800 span,
