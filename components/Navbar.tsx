@@ -103,10 +103,28 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-100 z-50 h-14 w-full">
+    <nav className="fixed top-0 left-0 right-0 bg-[#1A1A1A]/90 backdrop-blur-sm border-b border-white/10 z-50 h-16 w-full">
       <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
         {/* Logo */}
-        <Logo width={140} height={45} variant="light" />
+        <Logo width={140} height={45} variant="dark" />
+
+        {/* Auth Buttons - Show Login/Join when not logged in */}
+        {!isLoggedIn && (
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => router.push('/login')}
+              className="text-white/90 hover:text-white font-medium text-base transition-colors cursor-pointer"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => router.push('/choose-plan')}
+              className="bg-[#C84C4C] hover:bg-[#B43E3E] text-white font-medium text-base px-7 py-2.5 rounded-full transition-colors cursor-pointer"
+            >
+              Join Now
+            </button>
+          </div>
+        )}
 
         {/* User Dropdown - Only show if user is logged in */}
         {isLoggedIn && userData && (
@@ -114,21 +132,21 @@ export default function Navbar() {
             {/* User Avatar Button */}
             <button
               onClick={toggleDropdown}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
             >
-              <div className="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center text-white text-sm font-semibold">
+              <div className="w-9 h-9 rounded-full bg-[#C84C4C] flex items-center justify-center text-white text-sm font-semibold">
                 {userData.firstName
                   ? `${userData.firstName[0]}`.toUpperCase()
                   : userData.email?.[0].toUpperCase() || 'U'}
               </div>
-              <span className="text-sm text-gray-700 font-medium">
+              <span className="text-sm text-white/90 font-medium">
                 {userData.firstName
                   ? userData.firstName.toLowerCase()
                   : userData.email?.split('@')[0] || 'user'}
               </span>
               {/* Dropdown Arrow */}
               <svg
-                className={`w-4 h-4 text-gray-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 text-white/60 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

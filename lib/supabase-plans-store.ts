@@ -16,7 +16,7 @@ const getAdminClient = () => {
 export interface SubscriptionPlan {
   id: string;
   name: string;
-  type: 'physical-digital' | 'digital-with-app' | 'digital-only';
+  type: 'physical-digital' | 'digital-with-app' | 'digital-only' | 'founders-club';
   price: number;
   gst_percentage: number;
   vat_percentage: number;
@@ -32,7 +32,7 @@ export interface SubscriptionPlan {
 
 export interface CreatePlanData {
   name: string;
-  type: 'physical-digital' | 'digital-with-app' | 'digital-only';
+  type: 'physical-digital' | 'digital-with-app' | 'digital-only' | 'founders-club';
   price: number;
   gst_percentage?: number;
   vat_percentage?: number;

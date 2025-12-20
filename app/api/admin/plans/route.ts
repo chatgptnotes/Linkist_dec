@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!['physical-digital', 'digital-with-app', 'digital-only'].includes(type)) {
+    if (!['physical-digital', 'digital-with-app', 'digital-only', 'founders-club'].includes(type)) {
       return NextResponse.json(
         { error: 'Invalid plan type' },
         { status: 400 }
@@ -142,7 +142,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Validate type if provided
-    if (updateData.type && !['physical-digital', 'digital-with-app', 'digital-only'].includes(updateData.type)) {
+    if (updateData.type && !['physical-digital', 'digital-with-app', 'digital-only', 'founders-club'].includes(updateData.type)) {
       return NextResponse.json(
         { error: 'Invalid plan type' },
         { status: 400 }

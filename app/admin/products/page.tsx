@@ -16,6 +16,7 @@ import LayersIcon from '@mui/icons-material/Layers';
 import CloseIcon from '@mui/icons-material/Close';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import SmartphoneIcon from '@mui/icons-material/Smartphone';
+import StarIcon from '@mui/icons-material/Star';
 
 // Icon aliases
 const Package = Inventory2Icon;
@@ -32,6 +33,7 @@ const Layers = LayersIcon;
 const X = CloseIcon;
 const CreditCard = CreditCardIcon;
 const Smartphone = SmartphoneIcon;
+const Star = StarIcon;
 
 interface Product {
   id: string;
@@ -51,7 +53,7 @@ interface Product {
 interface SubscriptionPlan {
   id: string;
   name: string;
-  type: 'physical-digital' | 'digital-with-app' | 'digital-only';
+  type: 'physical-digital' | 'digital-with-app' | 'digital-only' | 'founders-club';
   price: number;
   gst_percentage: number;
   vat_percentage: number;
@@ -81,7 +83,7 @@ export default function ProductsPage() {
   const [showProductModal, setShowProductModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    type: 'physical-digital' as 'physical-digital' | 'digital-with-app' | 'digital-only',
+    type: 'physical-digital' as 'physical-digital' | 'digital-with-app' | 'digital-only' | 'founders-club',
     price: 0,
     gst_percentage: 18,
     vat_percentage: 5,
@@ -174,6 +176,7 @@ export default function ProductsPage() {
       case 'physical-digital': return <CreditCard className="h-5 w-5" />;
       case 'digital-with-app': return <Smartphone className="h-5 w-5" />;
       case 'digital-only': return <Package className="h-5 w-5" />;
+      case 'founders-club': return <Star className="h-5 w-5" />;
       default: return <Package className="h-5 w-5" />;
     }
   };
@@ -183,6 +186,7 @@ export default function ProductsPage() {
       case 'physical-digital': return 'Physical + Digital';
       case 'digital-with-app': return 'Digital + App';
       case 'digital-only': return 'Digital Only';
+      case 'founders-club': return "Founder's Club";
       default: return type;
     }
   };
@@ -839,6 +843,7 @@ export default function ProductsPage() {
                       <option value="physical-digital">Physical NFC Card + Digital</option>
                       <option value="digital-with-app">Digital Profile + App</option>
                       <option value="digital-only">Digital Profile Only</option>
+                      <option value="founders-club">Founder's Club</option>
                     </select>
                   </div>
 

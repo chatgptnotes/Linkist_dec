@@ -20,6 +20,18 @@ export default {
           800: '#990000', // Linkist Red - very dark
           900: '#660000', // Linkist Red - darkest
         },
+        gold: {
+          50: '#FFFAEB',
+          100: '#FCEFC7',
+          200: '#FAE3A3',
+          300: '#F7D070',
+          400: '#F5C651',
+          500: '#F2BD3B', // Primary Gold
+          600: '#D9A223',
+          700: '#B38115',
+          800: '#8C630D',
+          900: '#6E4C0A',
+        },
       },
     },
   },
